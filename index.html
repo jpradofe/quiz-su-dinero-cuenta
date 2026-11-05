@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Su dinero cuenta · Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{
+  --stage:#1d1840; --stage-2:#2a2358; --stage-3:#3a3172; --ink:#f6f3ff; --muted:#b9b2df;
+  --a0:#d6334a; --a1:#2f6fd6; --a2:#d99a0b; --a3:#21986a;
+  --gold:#ffd25e; --ok:#21986a; --bad:#d6334a;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--stage);color:var(--ink);font-family:var(--body);font-size:17px;-webkit-tap-highlight-color:transparent}
+.app{min-height:100%;display:flex;flex-direction:column;gap:18px;max-width:1100px;margin:0 auto;
+  padding-block:max(20px,env(safe-area-inset-top));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;text-wrap:balance}
+p{margin:0;line-height:1.5}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);font-weight:800}
+button{font-family:inherit;cursor:pointer;border:0}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{background:var(--ink);color:var(--stage);font-weight:800;font-size:19px;padding:15px 28px;border-radius:999px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.panel{background:var(--stage-2);border-radius:20px;padding:24px 22px;display:grid;gap:14px}
+input,select{width:100%;background:var(--stage);color:var(--ink);border:2px solid var(--stage-3);border-radius:14px;padding:14px;font:inherit;font-weight:800;font-size:20px}
+.muted{color:var(--muted)}
+.center{text-align:center}
+/* lobby */
+.lobby{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){.lobby{grid-template-columns:1fr}}
+.qrbox{background:#fff;border-radius:18px;padding:16px;display:grid;justify-items:center;gap:8px;color:#1d1840}
+.qrbox #qr{width:260px;height:260px}
+.qrbox #qr img,.qrbox #qr canvas{width:100%!important;height:auto!important}
+.code{font-family:var(--display);font-size:44px;font-weight:800;letter-spacing:.12em}
+.joinurl{font-size:13px;word-break:break-all;text-align:center;max-width:260px}
+.players{display:flex;flex-wrap:wrap;gap:10px}
+.pchip{background:var(--stage-3);padding:10px 16px;border-radius:999px;font-weight:800;font-size:18px}
+.pchip.off{opacity:.45}
+/* question */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.timer{width:78px;height:78px;flex:none;position:relative}
+.timer svg{width:100%;height:100%;transform:rotate(-90deg)}
+.timer span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:30px;font-weight:800}
+.qcard{background:var(--ink);color:var(--stage);border-radius:20px;padding:28px 22px;text-align:center}
+.qcard h2{font-size:clamp(24px,4.4vw,42px)}
+.qcard .ref{margin-top:8px;font-weight:800;color:#5d568a}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.answers{grid-template-columns:1fr}}
+.ans{display:flex;align-items:center;gap:14px;padding:18px;border-radius:16px;color:#fff;font-weight:800;font-size:clamp(18px,2.6vw,24px);text-align:left;min-height:86px;transition:opacity .3s,transform .3s;position:relative}
+.ans svg{width:36px;height:36px;flex:none}
+.ans .count{margin-left:auto;font-family:var(--display);font-size:28px}
+.ans.dim{opacity:.25}
+.ans.right{transform:scale(1.02);box-shadow:0 0 0 4px var(--gold)}
+.c0{background:var(--a0)}.c1{background:var(--a1)}.c2{background:var(--a2)}.c3{background:var(--a3)}
+.answered{font-weight:800;color:var(--muted)}
+.explain{background:var(--stage-2);border-radius:16px;padding:16px 18px;font-size:19px}
+/* board */
+.board{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--stage-2);border-radius:14px;padding:14px 18px;font-weight:800;font-size:21px}
+.bar .pos{font-family:var(--display);color:var(--muted)}
+.bar b{font-family:var(--display);font-size:28px;color:var(--gold);font-variant-numeric:tabular-nums}
+.bar.first{box-shadow:inset 0 0 0 3px var(--gold)}
+.big{font-size:clamp(36px,7vw,64px)}
+/* player */
+.pad{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1}
+.pad .ans{min-height:120px;flex-direction:column;justify-content:center;text-align:center;gap:8px;font-size:20px}
+.pad .ans svg{width:44px;height:44px}
+.pad.two .ans{min-height:180px}
+.result{flex:1;border-radius:22px;display:grid;place-content:center;gap:10px;text-align:center;padding:28px}
+.result.ok{background:var(--ok)}.result.bad{background:var(--bad)}.result.wait{background:var(--stage-2)}
+.result h2{font-size:clamp(34px,10vw,56px)}
+.result .pts{font-family:var(--display);font-size:30px}
+.err{background:var(--bad);border-radius:14px;padding:14px 16px;font-weight:800}
+.foot{margin-top:auto;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.ans{transition:none}}
+</style>
+</head>
+<body>
+<div class="app" id="app"><p class="muted">Cargando…</p></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="sesiones.js"></script>
+<script>
+"use strict";
+const PREFIX = "sudinerocuenta-";
+const TIME = 20;               // segundos por pregunta
+const SHAPES = [
+  '<svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,4 37,35 3,35" fill="#fff"/></svg>',
+  '<svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,2 38,20 20,38 2,20" fill="#fff"/></svg>',
+  '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fff"/></svg>',
+  '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="4" width="32" height="32" rx="3" fill="#fff"/></svg>'];
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+const params = new URLSearchParams(location.search);
+const sala = (params.get("sala") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+// Puntos: 1000 al responder al instante, 500 al último segundo.
+function puntos(ms){ return Math.round(1000 * (1 - Math.min(ms, TIME*1000) / (TIME*1000) / 2)); }
+
+if (typeof Peer === "undefined") {
+  app.innerHTML = '<div class="err">No se pudo cargar la conexión. Revise el internet y recargue la página.</div>';
+} else if (sala) {
+  jugador();
+} else {
+  anfitrion();
+}
+
+/* ================= ANFITRIÓN (pantalla grande) ================= */
+function anfitrion(){
+  const S = { sesion: null, i: -1, fase: "lobby", qStart: 0, timer: null, jug: new Map(), code: "" };
+  let peer;
+
+  function nuevaSala(){
+    S.code = Math.random().toString(36).slice(2, 7).toUpperCase().replace(/[^A-Z0-9]/g, "X");
+    peer = new Peer(PREFIX + S.code.toLowerCase());
+    peer.on("open", () => render());
+    peer.on("connection", conn => {
+      conn.on("data", d => recibir(conn, d));
+      conn.on("close", () => { for (const p of S.jug.values()) if (p.conn === conn) p.conn = null; if (S.fase === "lobby") render(); });
+    });
+    peer.on("disconnected", () => { try { peer.reconnect(); } catch(e){} });
+    peer.on("error", e => {
+      if (e.type === "unavailable-id") { peer.destroy(); nuevaSala(); return; }
+      if (e.type === "peer-unavailable") return;
+      console.warn(e);
+    });
+  }
+
+  function enviar(p, msg){ if (p.conn && p.conn.open) { try { p.conn.send(msg); } catch(e){} } }
+  function todos(fn){ for (const p of S.jug.values()) enviar(p, fn(p)); }
+  const preg = () => S.sesion.preguntas[S.i];
+
+  function mensajeEstado(p){
+    if (S.fase === "pregunta") {
+      const d = preg(), resta = Math.max(0, TIME - (Date.now() - S.qStart) / 1000);
+      return { t: "q", i: S.i, n: S.sesion.preguntas.length, q: d.q, ref: d.ref || "", o: d.o, resta, ya: p.ans != null };
+    }
+    if (S.fase === "final") return { t: "fin", pos: posicion(p), total: p.score, n: S.jug.size };
+    return { t: "espera", nombre: p.name, total: p.score };
+  }
+
+  function recibir(conn, d){
+    if (!d || typeof d !== "object") return;
+    if (d.t === "join") {
+      const name = String(d.name || "").trim().slice(0, 24);
+      if (!name) return;
+      const key = name.toLowerCase();
+      let p = S.jug.get(key);
+      if (!p) { p = { name, score: 0, ans: null, conn }; S.jug.set(key, p); }
+      else p.conn = conn;
+      enviar(p, { t: "ok", nombre: p.name });
+      enviar(p, mensajeEstado(p));
+      if (S.fase === "lobby" || S.fase === "pregunta") render();
+    }
+    if (d.t === "ans" && S.fase === "pregunta" && d.i === S.i) {
+      const p = [...S.jug.values()].find(x => x.conn === conn);
+      if (!p || p.ans != null) return;
+      const c = Number(d.c);
+      if (!(c >= 0 && c < preg().o.length)) return;
+      p.ans = { c, ms: Date.now() - S.qStart };
+      const cont = document.getElementById("cont");
+      if (cont) cont.textContent = contestados();
+      if ([...S.jug.values()].every(x => x.ans != null || !x.conn)) revelar();
+    }
+  }
+
+  const contestados = () => {
+    const vals = [...S.jug.values()];
+    return `${vals.filter(x => x.ans != null).length} de ${vals.length} respondieron`;
+  };
+  const orden = () => [...S.jug.values()].sort((a, b) => b.score - a.score);
+  const posicion = p => orden().indexOf(p) + 1;
+
+  function iniciarPregunta(){
+    S.i++; S.fase = "pregunta"; S.qStart = Date.now();
+    for (const p of S.jug.values()) p.ans = null;
+    render();
+    todos(p => mensajeEstado(p));
+    clearInterval(S.timer);
+    S.timer = setInterval(() => {
+      const resta = Math.max(0, Math.ceil(TIME - (Date.now() - S.qStart) / 1000));
+      const sec = document.getElementById("sec"), ring = document.getElementById("ring");
+      if (sec) sec.textContent = resta;
+      if (ring) ring.setAttribute("stroke-dashoffset", 100.5 * (1 - resta / TIME));
+      if (resta <= 0) revelar();
+    }, 250);
+  }
+
+  function revelar(){
+    if (S.fase !== "pregunta") return;
+    clearInterval(S.timer);
+    S.fase = "revelar";
+    const d = preg();
+    for (const p of S.jug.values()) {
+      p.ult = 0;
+      if (p.ans && p.ans.c === d.a) { p.ult = puntos(p.ans.ms); p.score += p.ult; }
+    }
+    render();
+    todos(p => ({ t: "res", ok: !!(p.ans && p.ans.c === d.a), resp: p.ans != null, pts: p.ult,
+                  total: p.score, pos: posicion(p), correcta: d.o[d.a] }));
+  }
+
+  function wake(){ try { navigator.wakeLock && navigator.wakeLock.request("screen").catch(() => {}); } catch(e){} }
+
+  function render(){
+    const n = S.sesion ? S.sesion.preguntas.length : 0;
+    if (S.fase === "lobby") {
+      const base = location.origin + location.pathname;
+      const url = base + "?sala=" + S.code;
+      const ses = Object.entries(window.SESIONES || {});
+      const lista = [...S.jug.values()];
+      app.innerHTML = `
+        <span class="eyebrow">Su dinero cuenta · Quiz en vivo</span>
+        <div class="lobby">
+          <div class="qrbox"><div id="qr"></div>
+            <div class="eyebrow" style="color:#5d568a">Código de sala</div>
+            <div class="code">${S.code || "…"}</div>
+            <div class="joinurl">${esc(url)}</div></div>
+          <div class="panel">
+            <h1 class="big">Escaneen el QR para unirse</h1>
+            <p class="muted">Una pareja por celular. Escriban el nombre de la pareja y esperen la primera pregunta.</p>
+            <label class="eyebrow" for="ses">Sesión</label>
+            <select id="ses">${ses.map(([k, v]) => `<option value="${k}">Sesión ${k} · ${esc(v.titulo)} (${esc(v.capitulos)})</option>`).join("")}</select>
+            <div class="eyebrow">${lista.length} pareja${lista.length === 1 ? "" : "s"} conectada${lista.length === 1 ? "" : "s"}</div>
+            <div class="players">${lista.map(p => `<span class="pchip ${p.conn ? "" : "off"}">${esc(p.name)}</span>`).join("") || '<span class="muted">Esperando parejas…</span>'}</div>
+            <div class="row"><button class="btn" id="go" ${lista.length ? "" : "disabled"}>Comenzar</button></div>
+          </div>
+        </div>
+        <p class="foot">La conexión es directa entre los celulares y esta pantalla. Mantengan esta página abierta durante todo el juego.</p>`;
+      const sel = document.getElementById("ses");
+      const prev = store.get("sesion"); if (prev && window.SESIONES[prev]) sel.value = prev;
+      if (S.code && window.QRCode) new QRCode(document.getElementById("qr"), { text: url, width: 520, height: 520, correctLevel: QRCode.CorrectLevel.M });
+      document.getElementById("go").onclick = () => {
+        store.set("sesion", sel.value);
+        S.sesion = window.SESIONES[sel.value]; S.i = -1; wake(); iniciarPregunta();
+      };
+      return;
+    }
+    if (S.fase === "pregunta" || S.fase === "revelar") {
+      const d = preg(), rev = S.fase === "revelar";
+      const cuenta = d.o.map((_, k) => [...S.jug.values()].filter(p => p.ans && p.ans.c === k).length);
+      app.innerHTML = `
+        <div class="top"><span class="eyebrow">Pregunta ${S.i + 1} de ${n}</span>
+          ${rev ? "" : `<div class="timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="#3a3172" stroke-width="4"/><circle id="ring" cx="18" cy="18" r="16" fill="none" stroke="#ffd25e" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="0" stroke-linecap="round"/></svg><span id="sec">${TIME}</span></div>`}</div>
+        <div class="qcard"><h2>${esc(d.q)}</h2>${d.ref ? `<div class="ref">${esc(d.ref)}</div>` : ""}</div>
+        <div class="answers">${d.o.map((o, k) => `<div class="ans c${k} ${rev ? (k === d.a ? "right" : "dim") : ""}">${SHAPES[k]}<span>${esc(o)}</span>${rev ? `<span class="count">${cuenta[k]}</span>` : ""}</div>`).join("")}</div>
+        ${rev
+          ? `<div class="explain">${esc(d.e)}</div><div class="row"><button class="btn" id="nx">${S.i < n - 1 ? "Ver marcador" : "Ver ganadores"}</button></div>`
+          : `<div class="row"><span class="answered" id="cont">${contestados()}</span><button class="btn ghost" id="rv">Revelar ya</button></div>`}`;
+      if (rev) document.getElementById("nx").onclick = () => S.i < n - 1 ? marcador() : final();
+      else document.getElementById("rv").onclick = revelar;
+      return;
+    }
+  }
+
+  function barras(){
+    return `<div class="board">${orden().map((p, k) => `<div class="bar ${k === 0 && p.score > 0 ? "first" : ""}"><span class="pos">${k + 1}</span><span>${esc(p.name)}</span><b>${p.score}</b></div>`).join("")}</div>`;
+  }
+  function marcador(){
+    S.fase = "marcador";
+    app.innerHTML = `<span class="eyebrow">Después de la pregunta ${S.i + 1}</span><h1 class="big">Marcador</h1>${barras()}
+      <div class="row"><button class="btn" id="nx">Siguiente pregunta</button></div>`;
+    document.getElementById("nx").onclick = iniciarPregunta;
+  }
+  function final(){
+    S.fase = "final";
+    const o = orden(), top = o.length ? o[0].score : 0;
+    const gan = o.filter(p => p.score === top && top > 0).map(p => esc(p.name));
+    app.innerHTML = `<div class="panel center"><span class="eyebrow">Resultado final</span>
+        <h1 class="big">${gan.length ? "🏆 " + gan.join(" y ") : "¡Empate!"}</h1>
+        <p class="muted">${esc(S.sesion.cierre || "")}</p></div>
+      ${barras()}
+      <div class="row"><button class="btn ghost" id="again">Volver a la sala</button></div>`;
+    todos(p => mensajeEstado(p));
+    document.getElementById("again").onclick = () => {
+      for (const p of S.jug.values()) { p.score = 0; p.ans = null; }
+      S.fase = "lobby"; S.i = -1; render(); todos(p => mensajeEstado(p));
+    };
+  }
+
+  nuevaSala();
+  render();
+}
+
+/* ================= JUGADOR (celular) ================= */
+function jugador(){
+  let peer, conn, nombre = store.get("nombre") || "", tick = null, intentos = 0;
+
+  function pantallaNombre(error){
+    app.innerHTML = `
+      <span class="eyebrow">Su dinero cuenta · Sala ${esc(sala)}</span>
+      <div class="panel">
+        <h1>¿Cómo se llama su pareja?</h1>
+        <p class="muted">Ejemplo: José y Ana</p>
+        <input id="nom" maxlength="24" autocomplete="off" value="${esc(nombre)}" placeholder="Nombre de la pareja">
+        ${error ? `<div class="err">${esc(error)}</div>` : ""}
+        <button class="btn" id="go">Entrar</button>
+      </div>`;
+    const inp = document.getElementById("nom");
+    const go = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } nombre = v; store.set("nombre", v); conectar(); };
+    document.getElementById("go").onclick = go;
+    inp.onkeydown = e => { if (e.key === "Enter") go(); };
+  }
+
+  function esperando(t, sub){
+    app.innerHTML = `<span class="eyebrow">${esc(nombre)}</span><div class="result wait"><h2>${esc(t)}</h2>${sub ? `<p>${esc(sub)}</p>` : ""}</div>`;
+  }
+
+  function conectar(){
+    esperando("Conectando…", "Un momento");
+    if (peer) { try { peer.destroy(); } catch(e){} }
+    peer = new Peer();
+    peer.on("open", () => {
+      conn = peer.connect(PREFIX + sala.toLowerCase(), { reliable: true });
+      const t = setTimeout(() => { if (!conn.open) fallo("No encontramos la sala. Revisen el código o escaneen el QR otra vez."); }, 12000);
+      conn.on("open", () => { clearTimeout(t); intentos = 0; conn.send({ t: "join", name: nombre }); });
+      conn.on("data", recibir);
+      conn.on("close", () => reintentar());
+    });
+    peer.on("error", e => {
+      if (e.type === "peer-unavailable") fallo("No encontramos la sala. Revisen el código o escaneen el QR otra vez.");
+      else reintentar();
+    });
+  }
+  function reintentar(){
+    if (intentos++ < 3) { esperando("Reconectando…", "Revisen el internet del celular"); setTimeout(conectar, 1500); }
+    else fallo("Se perdió la conexión. Toquen Entrar para volver a la partida; sus puntos se guardan.");
+  }
+  function fallo(msg){ clearInterval(tick); pantallaNombre(msg); }
+
+  function recibir(d){
+    clearInterval(tick);
+    if (d.t === "ok") { nombre = d.nombre; esperando("¡Listos!", "Miren la pantalla grande. La primera pregunta empieza pronto."); }
+    if (d.t === "espera") esperando("¡Listos!", d.total ? `Llevan ${d.total} puntos. Esperen la siguiente pregunta.` : "Miren la pantalla grande. La primera pregunta empieza pronto.");
+    if (d.t === "q") pregunta(d);
+    if (d.t === "res") {
+      const titulo = !d.resp ? "Se acabó el tiempo" : d.ok ? "¡Correcto!" : "Incorrecto";
+      app.innerHTML = `<span class="eyebrow">${esc(nombre)} · Puesto ${d.pos}</span>
+        <div class="result ${d.ok ? "ok" : "bad"}"><h2>${titulo}</h2>
+          ${d.ok ? `<div class="pts">+${d.pts}</div>` : `<p>La respuesta era: <b>${esc(d.correcta)}</b></p>`}
+          <p>Total: ${d.total} puntos</p></div>`;
+    }
+    if (d.t === "fin") {
+      app.innerHTML = `<span class="eyebrow">${esc(nombre)}</span>
+        <div class="result ${d.pos === 1 ? "ok" : "wait"}"><h2>${d.pos === 1 ? "🏆 ¡Ganaron!" : "Puesto " + d.pos}</h2>
+          <p>${d.total} puntos · ${d.n} parejas</p><p class="muted">Gracias por jugar</p></div>`;
+    }
+  }
+
+  function pregunta(d){
+    if (d.ya) { esperando("Respuesta enviada", "Esperen a que se revele la respuesta"); return; }
+    const fin = Date.now() + d.resta * 1000;
+    app.innerHTML = `
+      <div class="top"><span class="eyebrow">Pregunta ${d.i + 1} de ${d.n}</span><span class="eyebrow" id="sec">${Math.ceil(d.resta)} s</span></div>
+      <p style="font-weight:800;font-size:19px">${esc(d.q)}</p>
+      <div class="pad ${d.o.length === 2 ? "two" : ""}">${d.o.map((o, k) => `<button class="ans c${k}" data-k="${k}">${SHAPES[k]}<span>${esc(o)}</span></button>`).join("")}</div>`;
+    app.querySelectorAll(".pad .ans").forEach(b => b.onclick = () => {
+      try { conn.send({ t: "ans", i: d.i, c: Number(b.dataset.k) }); } catch(e){}
+      clearInterval(tick);
+      esperando("Respuesta enviada", "Esperen a que se revele la respuesta");
+    });
+    tick = setInterval(() => {
+      const s = Math.max(0, Math.ceil((fin - Date.now()) / 1000));
+      const el = document.getElementById("sec"); if (el) el.textContent = s + " s";
+      if (s <= 0) { clearInterval(tick); esperando("Se acabó el tiempo", "Miren la pantalla grande"); }
+    }, 250);
+  }
+
+  if (nombre) conectar(); else pantallaNombre();
+}
+</script>
+</body>
+</html>
