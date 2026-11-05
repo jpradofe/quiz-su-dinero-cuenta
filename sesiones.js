@@ -28,6 +28,12 @@ window.SESIONES = {
       { q: "“Se requiere de los administradores, que cada uno sea hallado…”", ref: "1 Corintios 4:2",
         o: ["rico", "exitoso", "fiel", "perfecto"], a: 2,
         e: "Fiel. Dios no pide mucho, pide fidelidad con lo que nos dio." },
+      { q: "“El que es fiel en lo muy poco, también en lo más es…”", ref: "Lucas 16:10",
+        o: ["rico", "fiel", "sabio", "feliz"], a: 1,
+        e: "Fiel. Cómo manejamos lo poco muestra cómo manejaríamos lo mucho." },
+      { q: "En la parábola de los talentos, ¿por qué el tercer siervo enterró su talento?", ref: "Mateo 25:14-30",
+        o: ["Lo perdió", "Tuvo miedo", "Se lo robaron", "Lo regaló"], a: 1,
+        e: "Tuvo miedo y tenía una idea equivocada de su señor. Dios no mide cuánto tenemos, sino qué hacemos con lo que nos dio." },
       { q: "Administramos bien el dinero para ganarnos el amor de Dios.",
         o: ["Verdadero", "Falso"], a: 1,
         e: "Falso. Ya somos amados en Cristo, que se hizo pobre por nosotros (2 Co 8:9). Administramos en respuesta a su gracia." }
